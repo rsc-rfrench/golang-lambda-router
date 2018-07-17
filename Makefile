@@ -8,6 +8,6 @@ deploy: test
 	$(terraform) apply
 
 test:
-	$(info # Require 100% Test Coverage)
+	$(info # Require Unit tests to hit 100% coverage)
 	$(go) test -coverprofile=coverage.out
-	($(go) tool cover -func=coverage.out | grep -v "100.0%"); [ ! $$? -eq 0 ]
+	@($(go) tool cover -func=coverage.out | grep -v "100.0%"); [ ! $$? -eq 0 ]
