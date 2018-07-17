@@ -3,6 +3,7 @@ package router
 import (
 	"github.com/aws/aws-lambda-go/events"
 	"regexp"
+	"strings"
 )
 
 type Request events.APIGatewayProxyRequest
@@ -40,4 +41,16 @@ func matchRoute(route string, path string) (map[string]string, bool) {
 		result = pattern.ExpandString(result, template, path, submatches)
 	}
 	return map[string]string{"key": string(result)}, matched
+}
+
+func createPatternFromRoute(route string) string {
+	components := strings.Split(route, "/")
+	for i, component := range components {
+		if strings.HasPrefix(component, ":") {
+			name := component[1:]
+			regex := `(?P<` + name + `>\w+)`
+			components[i] = regex
+		}
+	}
+	return strings.Join(components, "/")
 }

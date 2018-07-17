@@ -149,3 +149,17 @@ func TestRouteParamCapturesValue(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestCreatePatternFromRoute(t *testing.T) {
+	pattern := createPatternFromRoute(`/path/:key`)
+	if pattern != `/path/(?P<key>\w+)` {
+		t.Fail()
+	}
+}
+
+func TestCreatePatternFromMultiparameterRoute(t *testing.T) {
+	pattern := createPatternFromRoute(`/path/:a/fixed/:b`)
+	if pattern != `/path/(?P<a>\w+)/fixed/(?P<b>\w+)` {
+		t.Fail()
+	}
+}
