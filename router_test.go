@@ -125,7 +125,7 @@ func TestRouteParamMatches(t *testing.T) {
 }
 
 func TestBadRouteParamDoesntMatch(t *testing.T) {
-	route := `/path/(?P<key>\w+)`
+	route := `/path/:key`
 	_, matches := matchRoute(route, "/junk/value")
 	if matches {
 		t.Fail()
@@ -133,10 +133,19 @@ func TestBadRouteParamDoesntMatch(t *testing.T) {
 }
 
 func TestRouteParamCapturesKey(t *testing.T) {
-	route := `/path/(?P<key>\w+)`
+	route := `/path/:key`
 	results, _ := matchRoute(route, "/path/value")
 	_, ok := results["key"]
 	if !ok {
+		t.Fail()
+	}
+}
+
+func TestRouteParamCapturesValue(t *testing.T) {
+	route := `/path/(?P<key>\w+)`
+	results, _ := matchRoute(route, "/path/value")
+	value, _ := results["key"]
+	if value != "value" {
 		t.Fail()
 	}
 }

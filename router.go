@@ -34,7 +34,7 @@ func (r *Router) dumpRoutes() map[string]func(Request) (Response, error) {
 func matchRoute(route string, path string) (map[string]string, bool) {
 	pattern := regexp.MustCompile(route)
 	matched := pattern.MatchString(path)
-	template := "$key\n"
+	template := "$key"
 	result := []byte{}
 	for _, submatches := range pattern.FindAllStringSubmatchIndex(path, -1) {
 		result = pattern.ExpandString(result, template, path, submatches)
