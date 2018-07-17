@@ -100,6 +100,22 @@ func TestMissingPathGets404(t *testing.T) {
 	}
 }
 
+func TestStaticRouteMatches(t *testing.T) {
+	route := `/path`
+	_, matches := matchRoute(route, "/path")
+	if !matches {
+		t.Fail()
+	}
+}
+
+func TestBadStaticRouteDoesntMatch(t *testing.T) {
+	route := `/path`
+	_, matches := matchRoute(route, "/junk")
+	if matches {
+		t.Fail()
+	}
+}
+
 func TestRouteParamMatches(t *testing.T) {
 	route := `/path/(?P<key>\w+)`
 	_, matches := matchRoute(route, "/path/value")
@@ -108,10 +124,19 @@ func TestRouteParamMatches(t *testing.T) {
 	}
 }
 
-func TestRouteParamDoesntMatch(t *testing.T) {
+func TestBadRouteParamDoesntMatch(t *testing.T) {
 	route := `/path/(?P<key>\w+)`
 	_, matches := matchRoute(route, "/junk/value")
 	if matches {
+		t.Fail()
+	}
+}
+
+func TestRouteParamCapturesKey(t *testing.T) {
+	route := `/path/(?P<key>\w+)`
+	results, _ := matchRoute(route, "/path/value")
+	_, ok := results["key"]
+	if !ok {
 		t.Fail()
 	}
 }
