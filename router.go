@@ -1,8 +1,7 @@
-package main
+package router
 
 import (
 	"github.com/aws/aws-lambda-go/events"
-	"github.com/aws/aws-lambda-go/lambda"
 )
 
 type Request events.APIGatewayProxyRequest
@@ -12,7 +11,7 @@ type Router struct {
 	routes map[string]func(Request) (Response, error)
 }
 
-func (*Router) delegateRequest(request Request) (Response, error) {
+func (*Router) DelegateRequest(request Request) (Response, error) {
 	return Response{
 		Body:       request.Body,
 		StatusCode: 200,
@@ -24,10 +23,6 @@ func (r *Router) GET(path string, f func(Request) (Response, error)) {
 		r.routes = make(map[string]func(Request) (Response, error))
 	}
 	r.routes[path] = f
-}
-
-func (r *Router) Start() {
-	lambda.Start(r.delegateRequest)
 }
 
 func (r *Router) dumpRoutes() map[string]func(Request) (Response, error) {

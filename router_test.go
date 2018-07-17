@@ -1,11 +1,11 @@
-package main
+package router
 
 import "testing"
 
 func TestDelegateRequest(t *testing.T) {
 	router := Router{}
 	request := Request{}
-	response, err := router.delegateRequest(request)
+	response, err := router.DelegateRequest(request)
 	if response.StatusCode != 200 {
 		t.Fail()
 	}
