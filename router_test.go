@@ -99,3 +99,19 @@ func TestMissingPathGets404(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestRouteParamMatches(t *testing.T) {
+	route := `/path/(?P<key>\w+)`
+	_, matches := matchRoute(route, "/path/value")
+	if !matches {
+		t.Fail()
+	}
+}
+
+func TestRouteParamDoesntMatch(t *testing.T) {
+	route := `/path/(?P<key>\w+)`
+	_, matches := matchRoute(route, "/junk/value")
+	if matches {
+		t.Fail()
+	}
+}

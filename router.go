@@ -2,6 +2,7 @@ package router
 
 import (
 	"github.com/aws/aws-lambda-go/events"
+	"regexp"
 )
 
 type Request events.APIGatewayProxyRequest
@@ -28,4 +29,10 @@ func (r *Router) GET(path string, f func(Request) (Response, error)) {
 
 func (r *Router) dumpRoutes() map[string]func(Request) (Response, error) {
 	return r.routes
+}
+
+func matchRoute(route string, path string) (map[string]string, bool) {
+	pattern := regexp.MustCompile(route)
+	matched := pattern.MatchString(path)
+	return nil, matched
 }
