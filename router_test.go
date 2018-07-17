@@ -2,31 +2,100 @@ package router
 
 import "testing"
 
-func TestDelegateRequest(t *testing.T) {
+func hello(Request) (Response, error) {
+	return Response{
+		Body:       "hello",
+		StatusCode: 200,
+	}, nil
+}
+
+func goodbye(Request) (Response, error) {
+	return Response{
+		Body:       "goodbye",
+		StatusCode: 200,
+	}, nil
+}
+
+func TestGETInstallsRoute(t *testing.T) {
 	router := Router{}
-	request := Request{}
-	response, err := router.DelegateRequest(request)
-	if response.StatusCode != 200 {
+	router.GET("/hello", hello)
+	routes := router.dumpRoutes()
+	_, ok := routes["/hello"]
+	if !ok {
 		t.Fail()
 	}
+}
+
+func TestGETExecutesDesignatedHandler(t *testing.T) {
+	router := Router{}
+	router.GET("/hello", hello)
+
+	_, err := router.DelegateRequest(Request{
+		Path: "/hello",
+	})
 	if err != nil {
 		t.Fail()
 	}
 }
 
-func hello(Request) (Response, error) {
-	return Response{}, nil
-}
-
-func TestGETInstallsRoute(t *testing.T) {
-	installed := false
+func TestHandlerReturnsDesiredBody(t *testing.T) {
 	router := Router{}
 	router.GET("/hello", hello)
-	routes := router.dumpRoutes()
-	if _, ok := routes["/hello"]; ok {
-		installed = true
+
+	resp, _ := router.DelegateRequest(Request{
+		Path: "/hello",
+	})
+	if resp.Body != "hello" {
+		t.Fail()
 	}
-	if !installed {
+}
+
+func TestGETCanDistinguishHandlers(t *testing.T) {
+	router := Router{}
+	router.GET("/hello", hello)
+	router.GET("/goodbye", goodbye)
+
+	resp, _ := router.DelegateRequest(Request{
+		Path: "/goodbye",
+	})
+	if resp.Body != "goodbye" {
+		t.Fail()
+	}
+}
+
+func TestHandlerOrderIsCommutative(t *testing.T) {
+	router := Router{}
+	router.GET("/goodbye", goodbye)
+	router.GET("/hello", hello)
+
+	resp, _ := router.DelegateRequest(Request{
+		Path: "/goodbye",
+	})
+	if resp.Body != "goodbye" {
+		t.Fail()
+	}
+}
+
+func TestHandlersDontShadow(t *testing.T) {
+	router := Router{}
+	router.GET("/goodbye", goodbye)
+	router.GET("/hello", hello)
+
+	resp, _ := router.DelegateRequest(Request{
+		Path: "/hello",
+	})
+	if resp.Body != "hello" {
+		t.Fail()
+	}
+}
+
+func TestMissingPathGets404(t *testing.T) {
+	router := Router{}
+
+	resp, _ := router.DelegateRequest(Request{
+		Path: "/hello",
+	})
+	if resp.StatusCode != 404 {
 		t.Fail()
 	}
 }

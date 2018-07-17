@@ -11,11 +11,12 @@ type Router struct {
 	routes map[string]func(Request) (Response, error)
 }
 
-func (*Router) DelegateRequest(request Request) (Response, error) {
-	return Response{
-		Body:       request.Body,
-		StatusCode: 200,
-	}, nil
+func (r *Router) DelegateRequest(request Request) (Response, error) {
+	route, ok := r.routes[request.Path]
+	if ok {
+		return route(request)
+	}
+	return Response{StatusCode: 404}, nil
 }
 
 func (r *Router) GET(path string, f func(Request) (Response, error)) {
