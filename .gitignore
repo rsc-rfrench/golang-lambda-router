@@ -13,3 +13,6 @@
 
 # Terraform state
 *.tfstate*
+
+# Editor metadata
+*.swp
