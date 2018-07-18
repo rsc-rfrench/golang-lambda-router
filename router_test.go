@@ -163,3 +163,24 @@ func TestCreatePatternFromMultiparameterRoute(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestCreateTemplateFromMultiparameterRoute(t *testing.T) {
+	template := createTemplateFromRoute(`/path/:a/fixed/:b`)
+	if template != "a=$a\nb=$b" {
+		t.Error(template)
+	}
+}
+
+func TestCreateTemplateFromRoute(t *testing.T) {
+	template := createTemplateFromRoute(`/path/:a`)
+	if template != "a=$a" {
+		t.Error(template)
+	}
+}
+
+func TestCreateTemplateFromFixedRoute(t *testing.T) {
+	template := createTemplateFromRoute(`/path/fixed`)
+	if template != "" {
+		t.Error(template)
+	}
+}

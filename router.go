@@ -54,3 +54,16 @@ func createPatternFromRoute(route string) string {
 	}
 	return strings.Join(components, "/")
 }
+
+func createTemplateFromRoute(route string) string {
+	components := strings.Split(route, "/")
+	var template_items []string
+	for _, component := range components {
+		if strings.HasPrefix(component, ":") {
+			name := component[1:]
+			template_item := name + `=$` + name
+			template_items = append(template_items, template_item)
+		}
+	}
+	return strings.Join(template_items, "\n")
+}
