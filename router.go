@@ -15,8 +15,9 @@ type Route struct {
 }
 
 type Router struct {
-	GETs  []Route
-	POSTs []Route
+	GETs    []Route
+	POSTs   []Route
+	DELETEs []Route
 }
 
 func (r *Router) DelegateRequest(request Request) (Response, error) {
@@ -26,6 +27,8 @@ func (r *Router) DelegateRequest(request Request) (Response, error) {
 		routes = r.GETs
 	case "POST":
 		routes = r.POSTs
+	case "DELETE":
+		routes = r.DELETEs
 	default:
 		routes = r.GETs
 	}
@@ -47,6 +50,13 @@ func (r *Router) GET(path string, f func(Request, map[string]string) (Response, 
 
 func (r *Router) POST(path string, f func(Request, map[string]string) (Response, error)) {
 	r.POSTs = append(r.POSTs, Route{
+		Pattern: path,
+		Handler: f,
+	})
+}
+
+func (r *Router) DELETE(path string, f func(Request, map[string]string) (Response, error)) {
+	r.DELETEs = append(r.DELETEs, Route{
 		Pattern: path,
 		Handler: f,
 	})

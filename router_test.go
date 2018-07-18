@@ -281,3 +281,16 @@ func TestDistinguishRoutingByVerbs(t *testing.T) {
 		t.Error(resp.Body)
 	}
 }
+
+func TestDELETEGreetLucy(t *testing.T) {
+	router := Router{}
+	router.DELETE("/greet/:name", greet)
+
+	resp, _ := router.DelegateRequest(Request{
+		Path:       "/greet/lucy",
+		HTTPMethod: "DELETE",
+	})
+	if resp.Body != "Hello, lucy" {
+		t.Error(resp.Body)
+	}
+}
