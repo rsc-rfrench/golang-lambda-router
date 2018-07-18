@@ -2,14 +2,14 @@ package router
 
 import "testing"
 
-func hello(Request) (Response, error) {
+func hello(Request, map[string]string) (Response, error) {
 	return Response{
 		Body:       "hello",
 		StatusCode: 200,
 	}, nil
 }
 
-func goodbye(Request) (Response, error) {
+func goodbye(Request, map[string]string) (Response, error) {
 	return Response{
 		Body:       "goodbye",
 		StatusCode: 200,
@@ -117,7 +117,7 @@ func TestBadStaticRouteDoesntMatch(t *testing.T) {
 }
 
 func TestRouteParamMatches(t *testing.T) {
-	route := `/path/(?P<key>\w+)`
+	route := `/path/:key`
 	_, matches := matchRoute(route, "/path/value")
 	if !matches {
 		t.Fail()
@@ -142,11 +142,11 @@ func TestRouteParamCapturesKey(t *testing.T) {
 }
 
 func TestRouteParamCapturesValue(t *testing.T) {
-	route := `/path/(?P<key>\w+)`
+	route := `/path/:key`
 	results, _ := matchRoute(route, "/path/value")
 	value, _ := results["key"]
 	if value != "value" {
-		t.Fail()
+		t.Errorf("[%s]", value)
 	}
 }
 
@@ -182,5 +182,66 @@ func TestCreateTemplateFromFixedRoute(t *testing.T) {
 	template := createTemplateFromRoute(`/path/fixed`)
 	if template != "" {
 		t.Error(template)
+	}
+}
+
+func TestParseFixedPathHasZeroParams(t *testing.T) {
+	route := `/path/fixed`
+	path := `/path/fixed`
+	path_params, _ := matchRoute(route, path)
+	if len(path_params) != 0 {
+		t.Error(len(path_params))
+	}
+}
+
+func TestParseRouteYieldsCorrectNumberOfParams(t *testing.T) {
+	route := `/path/:a/fixed/:b`
+	path := `/path/aye/fixed/bee`
+	path_params, _ := matchRoute(route, path)
+	if len(path_params) != 2 {
+		t.Fail()
+	}
+}
+
+func TestParseRouteYieldsCorrectParamValues(t *testing.T) {
+	route := `/path/:a/fixed/:b`
+	path := `/path/aye/fixed/bee`
+	path_params, _ := matchRoute(route, path)
+	if path_params["a"] != "aye" {
+		t.Fail()
+	}
+	if path_params["b"] != "bee" {
+		t.Fail()
+	}
+}
+
+func greet(_ Request, x map[string]string) (Response, error) {
+	return Response{
+		Body:       "Hello, " + x["name"],
+		StatusCode: 200,
+	}, nil
+}
+
+func TestGETGreetBruce(t *testing.T) {
+	router := Router{}
+	router.GET("/greet/:name", greet)
+
+	resp, _ := router.DelegateRequest(Request{
+		Path: "/greet/bruce",
+	})
+	if resp.Body != "Hello, bruce" {
+		t.Error(resp.Body)
+	}
+}
+
+func TestGETGreetLucy(t *testing.T) {
+	router := Router{}
+	router.GET("/greet/:name", greet)
+
+	resp, _ := router.DelegateRequest(Request{
+		Path: "/greet/lucy",
+	})
+	if resp.Body != "Hello, lucy" {
+		t.Error(resp.Body)
 	}
 }
