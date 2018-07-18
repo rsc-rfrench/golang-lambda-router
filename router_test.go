@@ -246,3 +246,36 @@ func TestGETGreetLucy(t *testing.T) {
 		t.Error(resp.Body)
 	}
 }
+
+func TestPOSTGreetLucy(t *testing.T) {
+	router := Router{}
+	router.POST("/greet/:name", greet)
+
+	resp, _ := router.DelegateRequest(Request{
+		Path: "/greet/lucy",
+	})
+	if resp.Body != "Hello, lucy" {
+		t.Error(resp.Body)
+	}
+}
+
+func dismiss(_ Request, x map[string]string) (Response, error) {
+	return Response{
+		Body:       "Goodbye, " + x["name"],
+		StatusCode: 200,
+	}, nil
+}
+
+func TestDistinguishRoutingByVerbs(t *testing.T) {
+	router := Router{}
+	router.GET("/interact/:name", greet)
+	router.POST("/interact/:name", dismiss)
+
+	resp, _ := router.DelegateRequest(Request{
+		HTTPMethod: "POST",
+		Path:       "/interact/lucy",
+	})
+	if resp.Body != "Goodbye, lucy" {
+		t.Error(resp.Body)
+	}
+}

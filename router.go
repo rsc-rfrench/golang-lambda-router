@@ -35,6 +35,13 @@ func (r *Router) GET(path string, f func(Request, map[string]string) (Response, 
 	})
 }
 
+func (r *Router) POST(path string, f func(Request, map[string]string) (Response, error)) {
+	r.routes = append(r.routes, Route{
+		Pattern: path,
+		Handler: f,
+	})
+}
+
 func (r *Router) dumpRoutes() []Route {
 	return r.routes
 }
