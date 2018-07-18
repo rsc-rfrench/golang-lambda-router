@@ -15,11 +15,21 @@ type Route struct {
 }
 
 type Router struct {
-	routes []Route
+	GETs  []Route
+	POSTs []Route
 }
 
 func (r *Router) DelegateRequest(request Request) (Response, error) {
-	for _, route := range r.routes {
+	var routes []Route
+	switch request.HTTPMethod {
+	case "GET":
+		routes = r.GETs
+	case "POST":
+		routes = r.POSTs
+	default:
+		routes = r.GETs
+	}
+	for _, route := range routes {
 		params, ok := matchRoute(route.Pattern, request.Path)
 		if ok {
 			return route.Handler(request, params)
@@ -29,14 +39,24 @@ func (r *Router) DelegateRequest(request Request) (Response, error) {
 }
 
 func (r *Router) GET(path string, f func(Request, map[string]string) (Response, error)) {
-	r.routes = append(r.routes, Route{
+	r.GETs = append(r.GETs, Route{
 		Pattern: path,
 		Handler: f,
 	})
 }
 
-func (r *Router) dumpRoutes() []Route {
-	return r.routes
+func (r *Router) POST(path string, f func(Request, map[string]string) (Response, error)) {
+	r.POSTs = append(r.POSTs, Route{
+		Pattern: path,
+		Handler: f,
+	})
+}
+
+func (r *Router) dumpRoutes() map[string][]Route {
+	return map[string][]Route{
+		"GET":  r.GETs,
+		"POST": r.POSTs,
+	}
 }
 
 func matchRoute(route string, path string) (map[string]string, bool) {

@@ -18,11 +18,11 @@ func goodbye(Request, map[string]string) (Response, error) {
 
 func TestGETInstallsRoute(t *testing.T) {
 	router := Router{}
-	if len(router.dumpRoutes()) != 0 {
+	if len(router.dumpRoutes()["GET"]) != 0 {
 		t.Fail()
 	}
 	router.GET("/hello", hello)
-	if len(router.dumpRoutes()) != 1 {
+	if len(router.dumpRoutes()["GET"]) != 1 {
 		t.Fail()
 	}
 }
@@ -240,9 +240,44 @@ func TestGETGreetLucy(t *testing.T) {
 	router.GET("/greet/:name", greet)
 
 	resp, _ := router.DelegateRequest(Request{
-		Path: "/greet/lucy",
+		Path:       "/greet/lucy",
+		HTTPMethod: "GET",
 	})
 	if resp.Body != "Hello, lucy" {
+		t.Error(resp.Body)
+	}
+}
+
+func TestPOSTGreetLucy(t *testing.T) {
+	router := Router{}
+	router.POST("/greet/:name", greet)
+
+	resp, _ := router.DelegateRequest(Request{
+		Path:       "/greet/lucy",
+		HTTPMethod: "POST",
+	})
+	if resp.Body != "Hello, lucy" {
+		t.Error(resp.Body)
+	}
+}
+
+func dismiss(_ Request, x map[string]string) (Response, error) {
+	return Response{
+		Body:       "Goodbye, " + x["name"],
+		StatusCode: 200,
+	}, nil
+}
+
+func TestDistinguishRoutingByVerbs(t *testing.T) {
+	router := Router{}
+	router.GET("/interact/:name", greet)
+	router.POST("/interact/:name", dismiss)
+
+	resp, _ := router.DelegateRequest(Request{
+		HTTPMethod: "POST",
+		Path:       "/interact/lucy",
+	})
+	if resp.Body != "Goodbye, lucy" {
 		t.Error(resp.Body)
 	}
 }
