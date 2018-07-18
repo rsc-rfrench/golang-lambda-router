@@ -18,10 +18,11 @@ func goodbye(Request, map[string]string) (Response, error) {
 
 func TestGETInstallsRoute(t *testing.T) {
 	router := Router{}
+	if len(router.dumpRoutes()) != 0 {
+		t.Fail()
+	}
 	router.GET("/hello", hello)
-	routes := router.dumpRoutes()
-	_, ok := routes["/hello"]
-	if !ok {
+	if len(router.dumpRoutes()) != 1 {
 		t.Fail()
 	}
 }

@@ -9,28 +9,33 @@ import (
 type Request events.APIGatewayProxyRequest
 type Response events.APIGatewayProxyResponse
 
+type Route struct {
+	Pattern string
+	Handler func(Request, map[string]string) (Response, error)
+}
+
 type Router struct {
-	routes map[string]func(Request, map[string]string) (Response, error)
+	routes []Route
 }
 
 func (r *Router) DelegateRequest(request Request) (Response, error) {
-	for route, handler := range r.routes {
-		params, ok := matchRoute(route, request.Path)
+	for _, route := range r.routes {
+		params, ok := matchRoute(route.Pattern, request.Path)
 		if ok {
-			return handler(request, params)
+			return route.Handler(request, params)
 		}
 	}
 	return Response{StatusCode: 404}, nil
 }
 
 func (r *Router) GET(path string, f func(Request, map[string]string) (Response, error)) {
-	if r.routes == nil {
-		r.routes = make(map[string]func(Request, map[string]string) (Response, error))
-	}
-	r.routes[path] = f
+	r.routes = append(r.routes, Route{
+		Pattern: path,
+		Handler: f,
+	})
 }
 
-func (r *Router) dumpRoutes() map[string]func(Request, map[string]string) (Response, error) {
+func (r *Router) dumpRoutes() []Route {
 	return r.routes
 }
 
